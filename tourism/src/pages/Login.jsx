@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { host } from '../util/APIroutes'; // Assuming the correct path to your API routes
+import { host } from '../util/APIroutes';
+import { Navigate } from 'react-router-dom';
 
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleLogin = async () => {
     try {
@@ -21,10 +23,16 @@ function Login() {
       }
 
       // Handle successful login, e.g., redirect to dashboard
+      setIsLoggedIn(true)
+      
     } catch (error) {
       setErrorMessage('Login failed. Please check your credentials.');
     }
   };
+
+  if (isLoggedIn){
+    return <Navigate to='/home'/>
+  }
 
   return (
     <div>

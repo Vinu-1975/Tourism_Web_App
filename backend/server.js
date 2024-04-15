@@ -17,6 +17,7 @@ const users = [
 
 app.post('/api/login',(req,res)=>{
   const { username, password} = req.body;
+  console.log(username,password)
 
   if (!username || !password) {
     return res.status(400).json({ error: 'Please provide username and password' });
@@ -29,7 +30,6 @@ app.post('/api/login',(req,res)=>{
   if (!user){
     return res.status(401).json({ error: 'Invalid credentials' });
   }
-
   res.json({ message: 'Login successful',user})
 })
 
