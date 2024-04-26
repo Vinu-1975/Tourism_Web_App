@@ -55,13 +55,13 @@ module.exports.login = async (req,res) => {
         if (!validPassword) {
             return res.status(400).json({message : 'Incorrect password'})
         }
-        returnUser = {
+        userData = {
             _id : user._id,
             username:user.username,
             email:user.email,
         }
         console.log('login successful')
-        res.status(200).json({returnUser})
+        res.status(200).json({userData})
     }catch(err) {
         console.log('login error : ',err)
     }

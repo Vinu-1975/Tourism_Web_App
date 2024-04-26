@@ -2,8 +2,12 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { loginRoute } from '../util/APIroutes'; // Assuming you have a login route defined
+import { useDispatch } from 'react-redux';
+import { login } from '../redux/slices/authSlice';
+
 
 function Login() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [values, setValues] = useState({
@@ -28,6 +32,9 @@ function Login() {
     try {
       const { data } = await axios.post(loginRoute, formData);
       console.log(data);
+      // dispatch(login(data))
+      const userData = { user: data.userData };
+      dispatch(login(userData));
       navigate('/'); 
     } catch (err) {
       console.log('login error:', err);
