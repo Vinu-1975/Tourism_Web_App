@@ -1,60 +1,61 @@
 import { useState } from 'react';
-import { host } from '../util/APIroutes';
-import { Navigate } from 'react-router-dom';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { loginRoute } from '../util/APIroutes'; // Assuming you have a login route defined
 
 function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
-  const handleLogin = async () => {
-    try {
-      const response = await fetch(`${host}/api/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
+  const [values, setValues] = useState({
+    email: '',
+    password: ''
+  });
 
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
-
-      // Handle successful login, e.g., redirect to dashboard
-      setIsLoggedIn(true)
-      
-    } catch (error) {
-      setErrorMessage('Login failed. Please check your credentials.');
-    }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setValues(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
   };
 
-  if (isLoggedIn){
-    return <Navigate to='/home'/>
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('email',values.email)
+    formData.append('password',values.password)
+    console.log(formData)
+    try {
+      const { data } = await axios.post(loginRoute, formData);
+      console.log(data);
+      navigate('/'); 
+    } catch (err) {
+      console.log('login error:', err);
+    }
+  };
 
   return (
     <div>
       <h2>Login</h2>
-      {errorMessage && <p>{errorMessage}</p>}
-      <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+      <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+          <label>Email:</label>
+          <input 
+            type="email" 
+            name="email" 
+            value={values.email} 
+            onChange={handleChange} 
+            required 
           />
         </div>
         <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+          <label>Password:</label>
+          <input 
+            type="password" 
+            name="password" 
+            value={values.password} 
+            onChange={handleChange} 
+            required 
           />
         </div>
         <button type="submit">Login</button>
