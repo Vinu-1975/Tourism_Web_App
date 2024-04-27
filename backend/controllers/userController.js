@@ -7,7 +7,7 @@ module.exports.register = async (req,res) => {
     const saltRounds = 10
     try {
         console.log('registering')
-        const { username, email, password } = req.body
+        const { username, email,phoneNumber,gender, password } = req.body
         console.log(username, email, password)
 
         console.log('checking username in db')
@@ -26,7 +26,9 @@ module.exports.register = async (req,res) => {
         const newUser = await User.create({
             username,
             email,
-            password:hashedPassword
+            phoneNumber,
+            gender,
+            password:hashedPassword,
         })
         console.log('user created')
 
@@ -34,6 +36,8 @@ module.exports.register = async (req,res) => {
             _id : newUser._id,
             username:newUser.username,
             email:newUser.email,
+            phoneNumber:newUser.phoneNumber,
+            gender : newUser.gender
         }
         console.log('registration successful')
         res.status(201).json({returnUser})
@@ -59,6 +63,8 @@ module.exports.login = async (req,res) => {
             _id : user._id,
             username:user.username,
             email:user.email,
+            phoneNumber : user.phoneNumber,
+            gender : user.gender
         }
         console.log('login successful')
         res.status(200).json({userData})

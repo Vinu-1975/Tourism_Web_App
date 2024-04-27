@@ -9,7 +9,10 @@ function Register() {
   const [values, setValues] = useState({
     name: '',
     email: '',
-    password: ''
+    phoneNumber:'',
+    gender:'',
+    password: '',
+    confirmPassword : '',
   });
 
   const handleChange = (e) => {
@@ -26,7 +29,10 @@ function Register() {
     const formData = new FormData();
     formData.append('username',values.name)
     formData.append('email',values.email)
-    formData.append('password',values.password)
+    formData.append('phoneNumber', values.phoneNumber);
+    formData.append('gender', values.gender);
+    formData.append('password', values.password);
+    formData.append('confirmPassword',values.confirmPassword)
     console.log(formData)
     try {
       const { data } = await axios.post(registerRoute,formData)
@@ -63,7 +69,41 @@ function Register() {
           />
         </div>
         <div>
+          <label>Phone Number:</label>
+          <input
+            type="text"
+            name="phoneNumber"
+            value={values.phoneNumber}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div>
+          <label>Gender:</label>
+          <select
+            name="gender"
+            value={values.gender}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Select</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
           <label>Password:</label>
+          <input 
+            type="password" 
+            name="password" 
+            value={values.password} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        <div>
+          <label>ConfirmPassword:</label>
           <input 
             type="password" 
             name="password" 
