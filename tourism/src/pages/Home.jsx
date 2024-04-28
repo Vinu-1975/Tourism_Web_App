@@ -1,3 +1,5 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux"
 
 function Home() {
@@ -5,6 +7,27 @@ function Home() {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated)
   const user = useSelector((state) => state.auth.user); 
   console.log(isAuthenticated,user)
+
+  const [location, setLocation] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(()=> {
+
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setLocation({ latitude, longitude });
+        },
+        (error) => {
+          setError(error.message);
+        }
+      )
+    }else{
+      setError('Geolocation is not supported')
+    }
+  },[])
+
   return (
     <>
       <div>Home</div>
@@ -21,6 +44,15 @@ function Home() {
           </div>
         )}
       </div>
+      <div>
+      {error && <p>Error: {error}</p>}
+      {location && (
+        <p>
+          Latitude: {location.latitude}, Longitude: {location.longitude}
+        </p>
+      )}
+      {/* Fetch personalized content based on location */}
+    </div>
     </>
   )
 }

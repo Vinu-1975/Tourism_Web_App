@@ -1,7 +1,7 @@
 
 const bcrypt = require('bcrypt')
 const User = require('../models/userModel')
-
+const {generateToken} = require('../middleware/auth')
 
 module.exports.register = async (req,res) => {
     const saltRounds = 10
@@ -13,12 +13,12 @@ module.exports.register = async (req,res) => {
         console.log('checking username in db')
         const checkUsername = await User.findOne({username})
         if (checkUsername) {
-            return res.status(400).json({message : 'Username already exists'})
+            return res.status(201).json({status:false,message : 'Username already exists'})
         }
         console.log('checking email in db')
         const checkEmail = await User.findOne({email})
         if (checkEmail) {
-            return res.status(400).json({message : 'Email already exists'})
+            return res.status(201).json({status:false,message : 'Email already exists'})
         }
         const hashedPassword = await bcrypt.hash(password, saltRounds)
 
@@ -40,7 +40,7 @@ module.exports.register = async (req,res) => {
             gender : newUser.gender
         }
         console.log('registration successful')
-        res.status(201).json({returnUser})
+        res.status(201).json({status:true,returnUser})
     }
     catch(err) {
         console.log('register error : ',err)
@@ -64,11 +64,14 @@ module.exports.login = async (req,res) => {
             username:user.username,
             email:user.email,
             phoneNumber : user.phoneNumber,
-            gender : user.gender
+            gender : user.gender,
+            token:generateToken({id:user._id})
         }
+        console.log(userData)
         console.log('login successful')
         res.status(200).json({userData})
     }catch(err) {
         console.log('login error : ',err)
     }
 }
+
