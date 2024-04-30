@@ -1,7 +1,8 @@
-
+const nodemailer = require('nodemailer')
 const bcrypt = require('bcrypt')
 const User = require('../models/userModel')
 const {generateToken} = require('../middleware/auth')
+const jwt = require('jsonwebtoken')
 
 module.exports.register = async (req,res) => {
     const saltRounds = 10
@@ -75,3 +76,73 @@ module.exports.login = async (req,res) => {
     }
 }
 
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth : {
+        user: 'pkonami188@gmail.com',
+        pass: 'zvywhotlqennwrns'
+    }
+})
+
+module.exports.forgotPassword = async (req,res) => {
+    console.log('forgot-password')
+    const { email } = req.body
+    console.log(email)
+    try {
+        const user = await User.findOne({email});
+        if (!user){
+            return res.status(201).json({message : 'User with this email does not exist'})
+        }
+
+        const token = generateToken({id:user._id})
+
+        const mailOptions = {
+            from : 'pkonami188@gmail.com',
+            to: email,
+            subject : 'Password Reset',
+            html: `<p>You are receiving this email because you requested a password reset. Click <a href="http://localhost:5173/reset-password/${user._id}/${token}">here</a> to reset your password.</p>`
+        }
+
+        transporter.sendMail(mailOptions,(error,info) => {
+            if (error) {
+                console.log('Error sending email:',error)
+                return res.status(201).json({status:false,message : 'Failed to send Mail'})
+            }else{
+                console.log('Email sent : ',info.response)
+                return res.status(200).json({status:true,message : 'Email sent'})
+            }
+        })
+
+
+    }catch(err){
+        console.log('forgot password error : ',err)
+        return res.status(500).json({message: 'Internal server error'})
+    }
+}
+
+module.exports.resetPassword = async(req,res) => {
+    console.log('reset password')
+    const { id, token } = req.params
+    const { newPassword } = req.body
+
+    jwt.verify(token,process.env.JWT_SECRET,async (err,decoded) => {
+        if (err) {
+            console.log('Invalid token')
+            return res.status(401).json({message : 'Invalid token'})
+        }
+        try {
+            const user = await User.findById(id)
+            if (!user) {
+                console.log('User not found')
+                return res.status(404).json({message : 'User not found'})
+            }
+            const hashedPassword = await bcrypt.hash(newPassword,10)
+            user.password = hashedPassword
+            await user.save()
+            console.log('Password updated')
+            return res.status(200).json({message : 'Password updated'})
+        }catch(err){
+            console.log('reset password error : ',err)
+            return res.status(500).json({message : 'Internal server error'})
+        }
+})}
