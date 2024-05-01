@@ -1,8 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,Link } from "react-router-dom";
 import { registerRoute } from "../util/APIroutes";
 import toast, { Toaster } from "react-hot-toast";
+import BgImg from "../assets/loginImg5.png";
 
 function Register() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ function Register() {
     password: "",
     confirmPassword: "",
   });
+
 
   const [errors, setErrors] = useState({});
 
@@ -30,6 +32,7 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (handleValidation()) {
+      values.gender = gender
       const formData = new FormData();
       formData.append("username", values.name);
       formData.append("email", values.email);
@@ -41,25 +44,23 @@ function Register() {
       try {
         const { data } = await axios.post(registerRoute, formData);
         console.log(data);
-        if(data.status === false){
-          toast.error(data.message)
+        if (data.status === false) {
+          toast.error(data.message);
         }
-        if(data.status == true){
+        if (data.status == true) {
           navigate("/login");
-
         }
       } catch (err) {
         console.log("register error : ", err);
         toast.error("Registration failed");
       }
-    }else{
-      console.log('validation failed')
+    } else {
+      console.log("validation failed");
     }
   };
 
   const handleValidation = () => {
-    const { name, email, phoneNumber, password, confirmPassword } =
-      values;
+    const { name, email, phoneNumber, password, confirmPassword } = values;
     let errors = {};
     if (!name) {
       errors.username = "Username is required";
@@ -102,17 +103,23 @@ function Register() {
       toast.error("Passwords do not match");
     }
     setErrors(errors);
-    console.log(errors)
+    console.log(errors);
     return Object.keys(errors).length === 0;
   };
 
+  const [gender, setGender] = useState("Male");
+
+  const handleChangeR = (event) => {
+    setGender(event.target.value);
+  };
+
   return (
-    <div className="card">
-      <Toaster
-        position="top-center"
-        reverseOrder={false}
-      />
-      <div className="container">
+    <div className="auth lato-light">
+      <Toaster position="top-center" reverseOrder={false} />
+      <div className="left">
+        <img src={BgImg} alt="" />
+      </div>
+      <div className="right">
         <form onSubmit={(e) => handleSubmit(e)}>
           <div className="heading">
             <h2>Register</h2>
@@ -124,7 +131,6 @@ function Register() {
               placeholder="Username"
               value={values.name}
               onChange={handleChange}
-              // required
             />
             <span className="input-border"></span>
             {errors.username && <p>{errors.username}</p>}
@@ -136,7 +142,6 @@ function Register() {
               placeholder="Email"
               value={values.email}
               onChange={handleChange}
-              // required
             />
             {errors.email && <p>{errors.email}</p>}
           </div>
@@ -147,21 +152,52 @@ function Register() {
               placeholder="Phone Number"
               value={values.phoneNumber}
               onChange={handleChange}
-              // required
             />
           </div>
           <div>
-            <select
-              name="gender"
-              value={values.gender}
-              onChange={handleChange}
-              // required
-            >
-              <option value="">Select</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
+            {/* <select
+                name="gender"
+                value={values.gender}
+                onChange={handleChange}
+                // required
+              >
+                <option value="">Select</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select> */}
+            <div className="radio-inputs lato-regular">
+              <label className="radio">
+                <input
+                  type="radio"
+                  name="radio"
+                  value="Male"
+                  checked={gender === "Male"}
+                  onChange={handleChangeR}
+                />
+                <span className="name">Male</span>
+              </label>
+              <label className="radio">
+                <input
+                  type="radio"
+                  name="radio"
+                  value="Female"
+                  checked={gender === "Female"}
+                  onChange={handleChangeR}
+                />
+                <span className="name">Female</span>
+              </label>
+              <label className="radio">
+                <input
+                  type="radio"
+                  name="radio"
+                  value="Others"
+                  checked={gender === "Others"}
+                  onChange={handleChangeR}
+                />
+                <span className="name">Others</span>
+              </label>
+            </div>
           </div>
           <div>
             <input
@@ -186,8 +222,9 @@ function Register() {
             {errors.confirmPassword && <p>{errors.confirmPassword}</p>}
           </div>
           <button className="cssbuttons-io-button" type="submit">
-            Register
+            Create Acount
           </button>
+          <span className="direction-txt">Already have an account? <Link to='/login'>Login</Link></span>
         </form>
       </div>
     </div>

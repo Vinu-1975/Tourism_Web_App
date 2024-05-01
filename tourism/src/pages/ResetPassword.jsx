@@ -1,11 +1,13 @@
 import { useState } from "react"
-import { Link, useParams } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import toast, {Toaster} from 'react-hot-toast'
 import axios from "axios"
 import { resetPasswordRoute } from "../util/APIroutes"
+import BgImg from "../assets/loginImg5.png";
+
 
 function ResetPassword() {
-
+    const navigate = useNavigate()
     const [values,setValues] = useState({
         newPassword : '',
         confirmNewPassword : '',
@@ -28,6 +30,7 @@ function ResetPassword() {
                 // }
                 const { data } = await axios.post(`${resetPasswordRoute}/${id}/${token}`,formData)
                 console.log(data)
+                navigate('/login')
             }catch(err){
                 console.log("failed to update pass : ",err)
                 toast.error('Update Password Failed')
@@ -66,13 +69,16 @@ function ResetPassword() {
     }
 
   return (
-    <div className='card'>
+    <div className="auth">
         <Toaster
         position="top-center"
         reverseOrder={false}
       />
-        <div className="container">
-            <form onSubmit={(e) => handleSubmit(e)}>
+        <div className="left">
+            <img src={BgImg} alt="background" />
+        </div>
+        <div className="right">
+        <form onSubmit={(e) => handleSubmit(e)}>
                 <div className="heading">
                     <h2>Reset Password</h2>
                 </div>
@@ -98,12 +104,12 @@ function ResetPassword() {
                     />
                     {errors.confirmNewPassword && <p>{errors.confirmNewPassword}</p>}
                 </div>
-                <Link to='/login'>Back</Link>
+                <span className="direction-txt"><Link to='/login'>Back</Link></span>
                 <button type='submit'>Confirm</button>
             </form>
         </div>
-
     </div>
+            
   )
 }
 

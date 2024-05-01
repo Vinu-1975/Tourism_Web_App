@@ -4,12 +4,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { loginRoute } from "../util/APIroutes"; // Assuming you have a login route defined
 import { useDispatch } from "react-redux";
 import { login } from "../redux/slices/authSlice";
-
+import BgImg from "../assets/loginImg5.png";
 
 function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
 
   const [values, setValues] = useState({
     email: "",
@@ -43,14 +42,14 @@ function Login() {
     }
   };
 
-  
-
   return (
-    <div className="card">
-      <div className="container">
-        {/* {isForgotPassword ? <ForgotPassword/> :  */}
+    <div className="auth">
+      <div className="left">
+        <img src={BgImg} alt="" />
+      </div>
+      <div className="right">
         <form onSubmit={handleSubmit}>
-        <div className="heading">
+          <div className="heading">
             <h2>Login</h2>
           </div>
           <div>
@@ -74,10 +73,12 @@ function Login() {
             />
           </div>
           {/* <button onClick={()=>setIsForgotPassword(!isForgotPassword)}>Forgot Password</button> */}
-          <Link to='/forgot-password'>Forgot Password</Link>
-          <button className="cssbuttons-io-button" type="submit">Login</button>
+          <Link to="/forgot-password">Forgot Password</Link>
+          <button className="cssbuttons-io-button" type="submit">
+            Login
+          </button>
+            <span className="direction-txt">Don&apos;t have an account? <Link to="/register">Register</Link></span>
         </form>
-{/* } */}
       </div>
     </div>
   );
