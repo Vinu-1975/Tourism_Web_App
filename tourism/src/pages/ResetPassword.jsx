@@ -105,7 +105,7 @@ function ResetPassword() {
                     {errors.confirmNewPassword && <p>{errors.confirmNewPassword}</p>}
                 </div>
                 <span className="direction-txt"><Link to='/login'>Back</Link></span>
-                <button type='submit'>Confirm</button>
+                <button type='submit' className="cssbuttons-io-button">Confirm</button>
             </form>
         </div>
     </div>

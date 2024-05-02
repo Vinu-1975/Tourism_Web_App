@@ -13,7 +13,8 @@ const port = process.env.PORT || 3001;
 const upload = multer()
 
 //middlewares
-app.use(cors({ origin: 'http://localhost:5173' }))
+// app.use(cors({ origin: ['http://localhost:5173','http://localhost:3001'] }))
+app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(upload.none())

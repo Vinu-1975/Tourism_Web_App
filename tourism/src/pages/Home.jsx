@@ -1,4 +1,4 @@
-import axios from "axios";
+// import axios from "axios";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux"
 
@@ -28,6 +28,7 @@ function Home() {
     }
   },[])
 
+
   return (
     <>
       <div>Home</div>
@@ -52,7 +53,9 @@ function Home() {
         </p>
       )}
       {/* Fetch personalized content based on location */}
+      
     </div>
+
     </>
   )
 }

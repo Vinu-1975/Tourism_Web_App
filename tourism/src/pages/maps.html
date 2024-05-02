@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Navigation Page</title>
+		<style>
+			/* ... existing styles ... */
+			* {
+				box-sizing: border-box;
+			}
+
+			body {
+				margin: 0; /* remove default margin */
+				background-color: #f5f5f5; /* subtle white */
+			}
+
+			.navbar {
+				overflow: hidden;
+				background-color: #007bff; /* shade of blue */
+				margin: 0; /* remove margin */
+			}
+
+			.navbar a {
+				float: left;
+				display: block;
+				color: #f2f2f2;
+				text-align: center;
+				padding: 14px 16px;
+				text-decoration: none;
+			}
+
+			.navbar a:hover {
+				background-color: #ddd;
+				color: black;
+			}
+
+			#selection {
+				display: flex; /* Add this line */
+				justify-content: space-around; /* Add this line */
+				padding: 10px;
+				background-color: #f0f0f0;
+				border-radius: 5px;
+				box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+				margin: 10px;
+				transition: all 0.3s ease;
+			}
+
+			#selection:hover {
+				box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* shadow gets bigger on hover */
+			}
+
+			#selection select {
+				padding: 5px; /* padding for the select element */
+				border: none; /* remove default border */
+				border-radius: 5px; /* rounded corners for the select element */
+				background: #fff; /* white background for the select element */
+				box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* subtle shadow for the select element */
+			}
+
+			#selection button {
+				padding: 10px 20px;
+				margin: 5px;
+				border: none;
+				border-radius: 5px;
+				background-color: #007bff;
+				color: #fff;
+				cursor: pointer;
+				transition: background-color 0.3s ease;
+			}
+
+			#selection button:hover {
+				background-color: #0056b3;
+			}
+
+			#searchInput {
+				padding: 5px;
+				border: none;
+				border-radius: 5px;
+				background: #fff;
+				box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+				flex-grow: 1; /* Allow the input to take up remaining space */
+				margin-right: 10px; /* Add some margin to the right */
+			}
+
+			#map {
+				height: calc(100vh - 47px); /* 120px is the height of the navbar and selection div combined */
+				width: 65%;
+				float: right;
+				margin: 0; /* remove margin */
+			}
+
+			#info-container {
+				width: 35%;
+				height: calc(100vh - 95px);
+				float: left;
+				margin: 0;
+			}
+
+			#information {
+				height: calc(100% - 40px); /* Adjusted to take up remaining height after #selection */
+				overflow: auto;
+				padding: 10px;
+				margin: 0;
+			}
+
+			#information h2 {
+				padding: 0px;
+				color: #000000;
+				text-align: center;
+				margin: 0px;
+			}
+
+			.card {
+				background-color: #fff; /* white */
+				border: 1px solid #ddd;
+				margin: 10px 0;
+				padding: 10px;
+				border-radius: 5px;
+				box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+				transition: 0.3s;
+			}
+
+			.card:hover {
+				box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+			}
+
+			.card img {
+				width: 100%;
+				height: auto;
+				border-radius: 5px;
+				margin-bottom: 10px;
+			}
+
+			.card h3 {
+				margin: 0;
+				padding: 0;
+				text-align: center;
+				color: #333;
+			}
+
+			.card p {
+				margin: 5px 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="navbar">
+			<a href="#home">Home</a>
+			<a href="#news">News</a>
+			<a href="#contact">Contact</a>
+			<a href="#about">About</a>
+		</div>
+
+		<div id="info-container">
+			<div id="selection">
+				<input id="searchInput" type="text" placeholder="Search..." onkeyup="searchPlaces(event)" />
+				<button id="attractionsButton" onclick="updateCategory('attractions')">Attractions</button>
+				<button id="cuisinesButton" onclick="updateCategory('cuisines')">Cuisines</button>
+				<button id="hotelsButton" onclick="updateCategory('hotels')">Hotels</button>
+			</div>
+
+			<div id="information">
+				<!-- Nearby attractions will be populated here -->
+			</div>
+		</div>
+
+		<div id="map"></div>
+
+		<script>
+			var map;
+			var attractionMarker;
+			var watchId; // Declare watchId globally
+			var selectedCategory = "attractions"; // Default selected category
+
+			function initMap() {
+				map = new google.maps.Map(document.getElementById("map"), {
+					zoom: 12 /* Increase the initial zoom level */,
+				});
+
+				var currentLocationMarker = new google.maps.Marker({
+					map: map,
+					icon: {
+						url: "http://maps.gstatic.com/mapfiles/ms2/micons/blue.png", // replace this with the URL of your custom icon
+					},
+				});
+
+				// Try HTML5 geolocation.
+				if (navigator.geolocation) {
+					watchId = navigator.geolocation.watchPosition(
+						function (position) {
+							var pos = {
+								lat: position.coords.latitude,
+								lng: position.coords.longitude,
+							};
+
+							currentLocationMarker.setPosition(pos);
+							map.panTo(pos); // Smoothly move to the new location
+
+							updateInformation(); // Update information based on selected category
+						},
+						function () {
+							handleLocationError(true, map.getCenter());
+						}
+					);
+				} else {
+					// Browser doesn't support Geolocation
+					handleLocationError(false, map.getCenter());
+				}
+			}
+
+			function searchPlaces(event) {
+				if (event.key === "Enter") {
+					var searchInput = document.getElementById("searchInput");
+					var service = new google.maps.places.PlacesService(map);
+					service.textSearch(
+						{
+							query: searchInput.value,
+							location: map.getCenter(),
+							radius: 5000,
+						},
+						callback
+					);
+				}
+			}
+
+			function updateCategory(category) {
+				selectedCategory = category;
+				updateInformation();
+			}
+
+			function updateInformation() {
+				var informationDiv = document.getElementById("information");
+				informationDiv.innerHTML = "<h2>Nearby " + selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) + "</h2>";
+
+				var service = new google.maps.places.PlacesService(map);
+				service.nearbySearch(
+					{
+						location: map.getCenter(),
+						radius: 5000,
+						type: [
+							selectedCategory === "attractions" ? "tourist_attraction" : selectedCategory === "cuisines" ? "restaurant" : "lodging",
+						],
+					},
+					callback
+				);
+			}
+
+			function callback(results, status) {
+				var informationDiv = document.getElementById("information");
+				informationDiv.innerHTML = ""; // Clear the existing content
+				if (status === google.maps.places.PlacesServiceStatus.OK) {
+					var service = new google.maps.places.PlacesService(map);
+					results.sort(function (a, b) {
+						return b.rating - a.rating;
+					});
+					for (var i = 0; i < results.length; i++) {
+						service.getDetails(
+							{
+								placeId: results[i].place_id,
+							},
+							function (place, status) {
+								if (status === google.maps.places.PlacesServiceStatus.OK) {
+									var card = document.createElement("div");
+									card.className = "card";
+
+									var title = document.createElement("h3");
+									title.innerHTML = place.name;
+									card.appendChild(title);
+
+									var address = document.createElement("p");
+									address.innerHTML = "Address: " + place.formatted_address;
+									card.appendChild(address);
+
+									if (place.rating) {
+										var rating = document.createElement("p");
+										rating.innerHTML = "Rating: " + place.rating;
+										card.appendChild(rating);
+									}
+
+									if (place.photos) {
+										var photo = document.createElement("img");
+										photo.src = place.photos[0].getUrl();
+										card.appendChild(photo);
+									}
+
+									if (place.formatted_phone_number) {
+										var phone = document.createElement("p");
+										phone.innerHTML = "Phone: " + place.formatted_phone_number;
+										card.appendChild(phone);
+									}
+
+									card.addEventListener("click", generateClickListener(place));
+
+									informationDiv.appendChild(card);
+								}
+							}
+						);
+					}
+				}
+			}
+
+			function generateClickListener(place) {
+				return function () {
+					if (attractionMarker) {
+						attractionMarker.setMap(null);
+					}
+					attractionMarker = new google.maps.Marker({
+						map: map,
+						position: place.geometry.location,
+					});
+					navigator.geolocation.clearWatch(watchId); // Stop watching the user's location
+					map.setZoom(12); // Set the zoom level to a lower value before panning
+					map.panTo(place.geometry.location); // Smoothly move to the new location
+					map.setZoom(15); // Increase the zoom level after panning
+					// Start watching the user's location again after a delay
+					setTimeout(function () {
+						watchId = navigator.geolocation.watchPosition(
+							function (position) {
+								var pos = {
+									lat: position.coords.latitude,
+									lng: position.coords.longitude,
+								};
+								currentLocationMarker.setPosition(pos);
+							},
+							function () {
+								handleLocationError(true, map.getCenter());
+							}
+						);
+					}, 2000); // Adjust the delay as needed
+				};
+			}
+
+			function handleLocationError(browserHasGeolocation, pos) {
+				alert(browserHasGeolocation ? "Error: The Geolocation service failed." : "Error: Your browser doesn't support geolocation.");
+			}
+		</script>
+		<script
+			async
+			defer
+			src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDS6AEeYiBTFX5JF7D33rosR86LmLmqhpI&libraries=places&callback=initMap"
+		></script>
+	</body>
+</html>

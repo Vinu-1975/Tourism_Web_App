@@ -70,6 +70,7 @@ module.exports.login = async (req,res) => {
         }
         console.log(userData)
         console.log('login successful')
+        // res.redirect('http://127.0.0.1:5000/')
         res.status(200).json({userData})
     }catch(err) {
         console.log('login error : ',err)
@@ -146,3 +147,43 @@ module.exports.resetPassword = async(req,res) => {
             return res.status(500).json({message : 'Internal server error'})
         }
 })}
+
+const request = require('request')
+
+module.exports.flasktrial = async(req,res) => {
+    console.log('flask trial')
+    console.log(req.body)
+    request('http://127.0.0.1:5000/ggg',function (err,response,body){
+        console.error('error:', err); // Print the error
+        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+        console.log('body:', body); // Print the data received
+        // res.send(body);
+        res.json({message : 'flask trial',response,body})
+    })
+}
+const axios = require('axios')
+
+module.exports.cuisineRecc = async(req,res) => {
+    console.log('cuisine recc')
+    console.log(req.body)
+    const options = {
+        url: 'http://127.0.0.1:5000/rec',
+        method: 'POST',
+        json: true,  // Automatically stringify the JSON data
+        body: req.body  // Send the request body (assumed to be JSON data)
+    };
+
+    // Make the POST request to the Flask server
+    request(options, (error, response, body) => {
+        if (error) {
+            console.error('Error sending request to Flask:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        } else {
+            console.log('Received response from Flask:', body);
+
+            // Send the received response back to the client
+            res.json(body);
+        }
+    });
+    // res.json({message : 'cuisine recc backend res'})
+}

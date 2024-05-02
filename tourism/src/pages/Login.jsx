@@ -8,7 +8,7 @@ import BgImg from "../assets/loginImg5.png";
 
 function Login() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const [values, setValues] = useState({
     email: "",
@@ -36,7 +36,8 @@ function Login() {
       console.log(data);
       const userData = { user: data.userData };
       dispatch(login(userData));
-      navigate("/");
+      window.location.href = "http://127.0.0.1:5000/";
+      // navigate("/");
     } catch (err) {
       console.log("login error:", err);
     }
